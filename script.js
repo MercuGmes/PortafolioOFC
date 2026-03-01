@@ -48,6 +48,21 @@
       iconPath: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8',
       link: 'proyecto3/',
       github: 'https://github.com/MercuGmes'
+    },
+    {
+      title: 'PassForge',
+      desc: 'Generador de contraseñas seguras con medidor de fortaleza, historial, verificación de filtraciones via API y consejos de seguridad.',
+      tags: ['HTML', 'CSS', 'JavaScript'],
+      tagColors: [
+        { bg: 'rgba(167,139,250,0.1)', color: '#a78bfa' },
+        { bg: 'rgba(34,211,238,0.1)', color: '#22d3ee' },
+        { bg: 'rgba(247,223,30,0.1)', color: '#f7df1e' }
+      ],
+      gradient: 'linear-gradient(135deg, #0d0a15 0%, #151025 50%, #0d1117 100%)',
+      accentColor: '#a78bfa',
+      iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+      link: 'proyecto4/',
+      github: 'https://github.com/MercuGmes'
     }
   ];
 
