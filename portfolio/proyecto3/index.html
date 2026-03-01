@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevNotes — App de Notas</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Space Grotesk', sans-serif; background: #0c0f15; color: #e0e6ef; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    .app-layout {
+      display: grid; grid-template-columns: 260px 1fr; min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #10141c; border-right: 1px solid rgba(255,255,255,0.06);
+      display: flex; flex-direction: column; padding: 1.5rem 1rem;
+    }
+    .sidebar-logo { font-weight: 700; font-size: 1.15rem; margin-bottom: 2rem; padding: 0 0.5rem; }
+    .sidebar-logo span { color: #a78bfa; }
+    .sidebar-section { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #4a5568; padding: 0 0.5rem; margin-bottom: 0.75rem; margin-top: 1.5rem; }
+    .sidebar-section:first-of-type { margin-top: 0; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.88rem; color: #8898aa;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 2px;
+    }
+    .sidebar-item:hover { background: rgba(255,255,255,0.04); color: #e0e6ef; }
+    .sidebar-item.active { background: rgba(167,139,250,0.1); color: #a78bfa; }
+    .sidebar-item svg { flex-shrink: 0; }
+    .sidebar-count { margin-left: auto; font-size: 0.72rem; background: rgba(255,255,255,0.06); padding: 0.15rem 0.5rem; border-radius: 10px; color: #64748b; }
+
+    .main { display: flex; flex-direction: column; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .topbar h1 { font-size: 1.25rem; font-weight: 700; }
+    .btn-new {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #a78bfa, #818cf8); color: #0c0f15;
+      padding: 0.55rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.85rem;
+      border: none; cursor: pointer; font-family: inherit; transition: all 0.3s;
+    }
+    .btn-new:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(167,139,250,0.3); }
+
+    .notes-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem; padding: 2rem; flex: 1;
+    }
+    .note-card {
+      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 1.5rem; cursor: pointer;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .note-card:hover { border-color: rgba(167,139,250,0.3); transform: translateY(-3px); }
+    .note-tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 0.2rem 0.6rem;
+      border-radius: 4px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.75rem;
+    }
+    .tag-js { background: rgba(247,223,30,0.1); color: #f7df1e; }
+    .tag-css { background: rgba(38,77,228,0.1); color: #5b9bf7; }
+    .tag-html { background: rgba(227,76,38,0.1); color: #e34c26; }
+    .tag-react { background: rgba(97,218,251,0.1); color: #61dafb; }
+    .tag-python { background: rgba(55,118,171,0.1); color: #5ba0d4; }
+    .tag-general { background: rgba(167,139,250,0.1); color: #a78bfa; }
+    .note-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .note-preview { font-size: 0.85rem; color: #64748b; line-height: 1.6; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .note-code {
+      background: #0a0d12; border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      color: #94a3b8; line-height: 1.7; overflow: hidden;
+    }
+    .note-code .kw { color: #c792ea; }
+    .note-code .fn { color: #82aaff; }
+    .note-code .str { color: #c3e88d; }
+    .note-code .cm { color: #546e7a; }
+    .note-footer { display: flex; justify-content: space-between; align-items: center; }
+    .note-date { font-size: 0.75rem; color: #4a5568; }
+    .note-dots { color: #4a5568; cursor: pointer; font-size: 1.2rem; letter-spacing: 2px; }
+
+    .footer-bar {
+      text-align: center; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);
+      color: #4a5568; font-size: 0.82rem;
+    }
+    .footer-bar a { color: #a78bfa; }
+
+    @media (max-width: 768px) {
+      .app-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">Dev<span>Notes</span></div>
+      <div class="sidebar-section">General</div>
+      <div class="sidebar-item active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Todas las notas <span class="sidebar-count">6</span>
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Favoritas
+      </div>
+      <div class="sidebar-section">Etiquetas</div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f7df1e" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        JavaScript <span class="sidebar-count">2</span>
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5b9bf7" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        CSS <span class="sidebar-count">1</span>
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#61dafb" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        React <span class="sidebar-count">1</span>
+      </div>
+      <div class="sidebar-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5ba0d4" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        Python <span class="sidebar-count">1</span>
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="topbar">
+        <h1>Todas las notas</h1>
+        <button class="btn-new">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva nota
+        </button>
+      </div>
+
+      <div class="notes-grid">
+
+        <div class="note-card">
+          <span class="note-tag tag-js">JavaScript</span>
+          <h3 class="note-title">Array Methods</h3>
+          <div class="note-code">
+            <span class="kw">const</span> nums = [1, 2, 3, 4, 5];<br>
+            <span class="kw">const</span> doubled = nums.<span class="fn">map</span>(n => n * 2);<br>
+            <span class="kw">const</span> evens = nums.<span class="fn">filter</span>(n => n % 2 === 0);<br>
+            <span class="cm">// [2,4,6,8,10] y [2,4]</span>
+          </div>
+          <div class="note-footer">
+            <span class="note-date">28 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+        <div class="note-card">
+          <span class="note-tag tag-css">CSS</span>
+          <h3 class="note-title">CSS Grid rápido</h3>
+          <div class="note-code">
+            .grid {<br>
+            &nbsp;&nbsp;<span class="fn">display</span>: grid;<br>
+            &nbsp;&nbsp;<span class="fn">grid-template-columns</span>:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">repeat</span>(<span class="fn">auto-fit</span>,<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">minmax</span>(250px, 1fr));<br>
+            &nbsp;&nbsp;<span class="fn">gap</span>: 1rem;<br>
+            }
+          </div>
+          <div class="note-footer">
+            <span class="note-date">25 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+        <div class="note-card">
+          <span class="note-tag tag-react">React</span>
+          <h3 class="note-title">useState Hook</h3>
+          <div class="note-code">
+            <span class="kw">const</span> [count, setCount] =<br>
+            &nbsp;&nbsp;<span class="fn">useState</span>(0);<br><br>
+            <span class="kw">const</span> increment = () =><br>
+            &nbsp;&nbsp;<span class="fn">setCount</span>(prev => prev + 1);
+          </div>
+          <div class="note-footer">
+            <span class="note-date">22 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+        <div class="note-card">
+          <span class="note-tag tag-python">Python</span>
+          <h3 class="note-title">List Comprehension</h3>
+          <div class="note-code">
+            <span class="cm"># Crear lista de cuadrados</span><br>
+            squares = [x**2 <span class="kw">for</span> x <span class="kw">in</span><br>
+            &nbsp;&nbsp;<span class="fn">range</span>(10)]<br><br>
+            <span class="cm"># Filtrar pares</span><br>
+            evens = [x <span class="kw">for</span> x <span class="kw">in</span> squares<br>
+            &nbsp;&nbsp;<span class="kw">if</span> x % 2 == 0]
+          </div>
+          <div class="note-footer">
+            <span class="note-date">18 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+        <div class="note-card">
+          <span class="note-tag tag-js">JavaScript</span>
+          <h3 class="note-title">Fetch API</h3>
+          <div class="note-code">
+            <span class="kw">async function</span> <span class="fn">getData</span>() {<br>
+            &nbsp;&nbsp;<span class="kw">const</span> res = <span class="kw">await</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">fetch</span>(<span class="str">'/api/data'</span>);<br>
+            &nbsp;&nbsp;<span class="kw">const</span> data = <span class="kw">await</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;res.<span class="fn">json</span>();<br>
+            &nbsp;&nbsp;<span class="kw">return</span> data;<br>
+            }
+          </div>
+          <div class="note-footer">
+            <span class="note-date">14 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+        <div class="note-card">
+          <span class="note-tag tag-html">HTML</span>
+          <h3 class="note-title">Semántica HTML5</h3>
+          <p class="note-preview">Recordar usar siempre las etiquetas semánticas correctas: header, nav, main, section, article, aside y footer. Mejora la accesibilidad y el SEO del sitio.</p>
+          <div class="note-footer">
+            <span class="note-date">10 Feb 2026</span>
+            <span class="note-dots">···</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bar">
+        © 2026 DevNotes — Proyecto de <a href="../">Aaron Mejia Vega</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
