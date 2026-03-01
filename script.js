@@ -50,7 +50,7 @@
       github: 'https://github.com/MercuGmes'
     },
     {
-      title: 'PassForge',
+      title: 'MercuForge',
       desc: 'Generador de contraseñas seguras con medidor de fortaleza, historial, verificación de filtraciones via API y consejos de seguridad.',
       tags: ['HTML', 'CSS', 'JavaScript'],
       tagColors: [
