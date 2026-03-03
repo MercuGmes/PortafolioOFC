@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>AarText Studio — Herramienta de Texto</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#0b0d11;color:#e4e4e7;overflow-x:hidden;min-height:100vh;}
+    a{color:inherit;text-decoration:none;}
+    :root{--accent:#6366f1;--accent-light:#818cf8;--accent-glow:rgba(99,102,241,0.15);--accent-border:rgba(99,102,241,0.25);--bg-card:#12141a;--bg-card-hover:#16181f;--border:#1e2028;--text-main:#e4e4e7;--text-secondary:#9ca3af;--text-muted:#6b7280;--radius:14px;--shadow:0 4px 24px rgba(0,0,0,0.3);}
+
+    .navbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;background:rgba(11,13,17,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:padding 0.3s,box-shadow 0.3s;}
+    .navbar.scrolled{padding:0.7rem 2rem;box-shadow:0 2px 20px rgba(0,0,0,0.4);}
+    .logo{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;font-weight:700;color:#fff;}
+    .logo span{color:var(--accent);}
+    .nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center;}
+    .nav-links a{font-size:0.85rem;color:var(--text-secondary);transition:color 0.3s;font-weight:500;}
+    .nav-links a:hover{color:var(--accent-light);}
+    .btn-hamburger{display:none;background:none;border:none;color:#fff;cursor:pointer;padding:4px;}
+    .mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:90;}
+    .mobile-overlay.open{display:block;}
+    .mobile-menu{display:none;position:fixed;top:0;right:0;bottom:0;width:280px;z-index:95;background:#12141a;padding:2rem 1.5rem;flex-direction:column;gap:1.5rem;transform:translateX(100%);transition:transform 0.3s;border-left:1px solid var(--border);}
+    .mobile-menu.open{display:flex;transform:translateX(0);}
+    .mobile-menu-close{align-self:flex-end;background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px;}
+    .mobile-menu a{font-size:1.05rem;color:var(--text-secondary);padding:0.75rem 0;border-bottom:1px solid var(--border);transition:color 0.2s;font-weight:500;}
+    .mobile-menu a:hover{color:var(--accent-light);}
+
+    .hero{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:7rem 2rem 3rem;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%,var(--accent-glow) 0%,transparent 50%);animation:pulseGlow 6s ease-in-out infinite alternate;pointer-events:none;}
+    @keyframes pulseGlow{0%{opacity:0.3;transform:scale(1);}100%{opacity:0.6;transform:scale(1.1);}}
+    .hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-light);background:var(--accent-glow);padding:0.45rem 1.1rem;border-radius:50px;border:1px solid var(--accent-border);margin-bottom:1.5rem;animation:fadeUp 0.6s 0.1s both;}
+    .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.5rem,5.5vw,4rem);line-height:1.1;margin-bottom:1rem;font-weight:800;animation:fadeUp 0.6s 0.2s both;}
+    .hero h1 em{color:var(--accent);font-style:normal;position:relative;}
+    .hero h1 em::after{content:'';position:absolute;bottom:2px;left:0;right:0;height:3px;background:var(--accent);border-radius:2px;opacity:0.5;}
+    .hero p{color:var(--text-secondary);font-size:1.05rem;line-height:1.8;max-width:540px;margin-bottom:2rem;animation:fadeUp 0.6s 0.4s both;}
+    .hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;padding:0.85rem 2rem;border-radius:50px;font-weight:700;font-size:0.95rem;transition:all 0.3s;border:none;cursor:pointer;font-family:inherit;animation:fadeUp 0.6s 0.5s both;}
+    .hero-cta:hover{background:var(--accent-light);transform:translateY(-2px);box-shadow:0 8px 24px rgba(99,102,241,0.3);}
+    @keyframes fadeUp{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
+
+    .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;max-width:800px;margin:-1.5rem auto 0;padding:0 2rem;position:relative;z-index:2;}
+    .stat-pill{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center;transition:transform 0.3s,border-color 0.3s;}
+    .stat-pill:hover{transform:translateY(-3px);border-color:var(--accent-border);}
+    .stat-pill-num{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:800;color:var(--accent-light);}
+    .stat-pill-label{font-size:0.72rem;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+
+    .editor-section{padding:4rem 2rem;max-width:1100px;margin:0 auto;}
+    .section-header{text-align:center;margin-bottom:2.5rem;}
+    .section-header h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.6rem,3.5vw,2rem);font-weight:700;margin-bottom:0.5rem;}
+    .section-header p{color:var(--text-secondary);font-size:0.95rem;}
+
+    .editor-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+    .editor-panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);}
+    .panel-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:0.85rem;}
+    .panel-dot{width:8px;height:8px;border-radius:50%;}
+    .panel-badge{font-size:0.7rem;color:var(--text-muted);background:rgba(255,255,255,0.05);padding:0.2rem 0.6rem;border-radius:6px;font-weight:600;}
+    .editor-textarea{width:100%;min-height:320px;background:transparent;border:none;color:var(--text-main);font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.88rem;line-height:1.7;padding:1.25rem;resize:vertical;outline:none;}
+    .editor-textarea::placeholder{color:var(--text-muted);}
+    .preview-area{width:100%;min-height:320px;padding:1.25rem;font-family:'JetBrains Mono','Fira Code',monospace;font-size:0.88rem;line-height:1.7;color:var(--text-main);overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;}
+    .preview-area .highlight-space{background:rgba(239,68,68,0.2);border-radius:2px;color:#f87171;}
+    .preview-area .highlight-special{background:rgba(251,191,36,0.15);border-radius:2px;color:#fbbf24;}
+
+    .live-counters{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-top:1.5rem;}
+    .counter-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;transition:border-color 0.3s;}
+    .counter-box:hover{border-color:var(--accent-border);}
+    .counter-val{font-family:'Space Grotesk',sans-serif;font-size:1.75rem;font-weight:800;color:#fff;transition:transform 0.15s;}
+    .counter-val.bump{transform:scale(1.15);color:var(--accent-light);}
+    .counter-label{font-size:0.72rem;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;}
+
+    .tools-section{padding:3rem 2rem 2rem;max-width:1100px;margin:0 auto;}
+    .tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;}
+    .tool-btn{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:0.9rem 1.1rem;cursor:pointer;transition:all 0.25s;font-family:inherit;font-size:0.85rem;font-weight:600;color:var(--text-main);}
+    .tool-btn:hover{border-color:var(--accent);background:var(--bg-card-hover);transform:translateY(-2px);}
+    .tool-btn:active{transform:translateY(0);}
+    .tool-btn svg{flex-shrink:0;color:var(--accent-light);}
+    .tool-btn.destructive:hover{border-color:#ef4444;background:rgba(239,68,68,0.05);}
+    .tool-btn.destructive svg{color:#f87171;}
+
+    .extra-tools{padding:2rem 2rem 4rem;max-width:1100px;margin:0 auto;}
+    .extra-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;}
+    .extra-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;transition:all 0.3s;}
+    .extra-card:hover{border-color:var(--accent-border);transform:translateY(-3px);}
+    .extra-icon{width:40px;height:40px;border-radius:10px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:var(--accent-light);}
+    .extra-card h3{font-size:0.95rem;font-weight:700;margin-bottom:0.4rem;}
+    .extra-card p{font-size:0.82rem;color:var(--text-secondary);line-height:1.6;}
+
+    .history-section{padding:2rem 2rem 3rem;max-width:1100px;margin:0 auto;}
+    .history-list{display:flex;flex-direction:column;gap:0.5rem;max-height:250px;overflow-y:auto;}
+    .history-item{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.2s;font-size:0.82rem;}
+    .history-item:hover{border-color:var(--accent-border);}
+    .history-action{font-weight:700;color:var(--accent-light);}
+    .history-time{color:var(--text-muted);font-size:0.75rem;}
+    .history-undo{background:none;border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;color:var(--text-secondary);cursor:pointer;font-family:inherit;font-size:0.75rem;font-weight:600;transition:all 0.2s;}
+    .history-undo:hover{border-color:var(--accent);color:var(--accent-light);}
+    .history-empty{text-align:center;padding:2rem;color:var(--text-muted);font-size:0.85rem;}
+
+    .footer{text-align:center;padding:2.5rem 2rem;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.82rem;margin-top:2rem;}
+    .footer a{color:var(--accent-light);}
+    .footer-links{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .footer-links a{color:var(--text-secondary);font-size:0.82rem;transition:color 0.3s;font-weight:500;}
+    .footer-links a:hover{color:var(--accent-light);}
+
+    .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#fff;padding:0.7rem 1.4rem;border-radius:12px;font-size:0.85rem;font-weight:600;z-index:300;transition:transform 0.3s;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(99,102,241,0.3);}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+
+    .back-top{position:fixed;bottom:2rem;right:2rem;width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(20px);transition:opacity 0.3s,transform 0.3s;z-index:50;box-shadow:0 4px 16px rgba(99,102,241,0.25);}
+    .back-top.show{opacity:1;transform:translateY(0);}
+
+    @media(max-width:768px){.nav-links{display:none;}.btn-hamburger{display:flex;}.editor-layout{grid-template-columns:1fr;}.live-counters{grid-template-columns:repeat(2,1fr);}.stats-bar{grid-template-columns:repeat(2,1fr);}.tools-grid{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:480px){.stats-bar{grid-template-columns:1fr 1fr;}.tools-grid{grid-template-columns:1fr;}.live-counters{grid-template-columns:1fr 1fr;}}
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar" id="navbar">
+    <div class="logo">Aar<span>Text</span> Studio</div>
+    <ul class="nav-links">
+      <li><a href="#inicio">Inicio</a></li>
+      <li><a href="#editor">Editor</a></li>
+      <li><a href="#herramientas">Herramientas</a></li>
+      <li><a href="#historial">Historial</a></li>
+    </ul>
+    <button class="btn-hamburger" id="btnHamburger" aria-label="Abrir menú">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="mobile-menu-close" id="mobileClose" aria-label="Cerrar">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="#inicio" class="mobile-link">Inicio</a>
+    <a href="#editor" class="mobile-link">Editor</a>
+    <a href="#herramientas" class="mobile-link">Herramientas</a>
+    <a href="#historial" class="mobile-link">Historial</a>
+  </div>
+
+  <section class="hero" id="inicio">
+    <span class="hero-tag">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Herramienta de texto
+    </span>
+    <h1>Transforma tu texto<br>al <em>instante</em></h1>
+    <p>Limpia, formatea y analiza texto con herramientas profesionales. Vista previa en vivo, resaltado dinámico y contadores en tiempo real.</p>
+    <a href="#editor" class="hero-cta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Comenzar a editar
+    </a>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="stat-pill-num" id="statWords">0</div><div class="stat-pill-label">Palabras</div></div>
+    <div class="stat-pill"><div class="stat-pill-num" id="statChars">0</div><div class="stat-pill-label">Caracteres</div></div>
+    <div class="stat-pill"><div class="stat-pill-num" id="statLines">0</div><div class="stat-pill-label">Líneas</div></div>
+    <div class="stat-pill"><div class="stat-pill-num" id="statSentences">0</div><div class="stat-pill-label">Oraciones</div></div>
+  </div>
+
+  <section class="editor-section" id="editor">
+    <div class="section-header"><h2>Editor de texto</h2><p>Escribe o pega tu texto y observa los cambios en tiempo real.</p></div>
+    <div class="editor-layout">
+      <div class="editor-panel">
+        <div class="panel-header">
+          <div class="panel-title"><div class="panel-dot" style="background:#6366f1"></div> Entrada</div>
+          <span class="panel-badge" id="inputBadge">0 chars</span>
+        </div>
+        <textarea class="editor-textarea" id="inputText" placeholder="Escribe o pega tu texto aquí..." spellcheck="false"></textarea>
+      </div>
+      <div class="editor-panel">
+        <div class="panel-header">
+          <div class="panel-title"><div class="panel-dot" style="background:#22c55e"></div> Vista previa</div>
+          <span class="panel-badge" id="previewBadge">En vivo</span>
+        </div>
+        <div class="preview-area" id="previewArea">La vista previa aparecerá aquí...</div>
+      </div>
+    </div>
+    <div class="live-counters">
+      <div class="counter-box"><div class="counter-val" id="cntWords">0</div><div class="counter-label">Palabras</div></div>
+      <div class="counter-box"><div class="counter-val" id="cntChars">0</div><div class="counter-label">Caracteres</div></div>
+      <div class="counter-box"><div class="counter-val" id="cntSpaces">0</div><div class="counter-label">Espacios</div></div>
+      <div class="counter-box"><div class="counter-val" id="cntLines">0</div><div class="counter-label">Líneas</div></div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="herramientas">
+    <div class="section-header"><h2>Herramientas</h2><p>Aplica transformaciones a tu texto con un clic.</p></div>
+    <div class="tools-grid">
+      <button class="tool-btn" data-tool="doubleSpaces">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H3M21 8H3M21 12H3M21 16H3M21 20H3"/></svg>
+        Eliminar espacios dobles
+      </button>
+      <button class="tool-btn" data-tool="trimLines">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+        Quitar saltos vacíos
+      </button>
+      <button class="tool-btn" data-tool="uppercase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 20l5.5-16h3L15 20M3.5 14h9"/><path d="M16 8h4.5a2.5 2.5 0 010 5H16V8zM16 13h5a2.5 2.5 0 010 5H16v-5z"/></svg>
+        MAYÚSCULAS
+      </button>
+      <button class="tool-btn" data-tool="lowercase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 11a4 4 0 10-8 0 4 4 0 008 0zM17 7v8"/></svg>
+        minúsculas
+      </button>
+      <button class="tool-btn" data-tool="titlecase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+        Tipo Título
+      </button>
+      <button class="tool-btn" data-tool="sentencecase">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 20l5.5-16h3L15 20M3.5 14h9"/></svg>
+        Tipo oración
+      </button>
+      <button class="tool-btn" data-tool="removeSpecial">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        Quitar especiales
+      </button>
+      <button class="tool-btn" data-tool="removeNumbers">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"/></svg>
+        Quitar números
+      </button>
+      <button class="tool-btn" data-tool="reverseText">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+        Invertir texto
+      </button>
+      <button class="tool-btn" data-tool="trimAll">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16M4 20L20 4"/><path d="M9 4h6M9 20h6"/></svg>
+        Recortar espacios
+      </button>
+      <button class="tool-btn" data-tool="copyText">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copiar resultado
+      </button>
+      <button class="tool-btn destructive" data-tool="clearAll">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        Limpiar todo
+      </button>
+    </div>
+  </section>
+
+  <section class="extra-tools">
+    <div class="section-header"><h2>Más funciones</h2><p>Herramientas adicionales para potenciar tu productividad.</p></div>
+    <div class="extra-grid">
+      <div class="extra-card">
+        <div class="extra-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+        <h3>Análisis completo</h3>
+        <p>Conteo en tiempo real de palabras, caracteres, espacios, líneas y oraciones mientras escribes.</p>
+      </div>
+      <div class="extra-card">
+        <div class="extra-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>Vista previa en vivo</h3>
+        <p>Observa los cambios aplicados al instante con resaltado dinámico de espacios dobles y caracteres especiales.</p>
+      </div>
+      <div class="extra-card">
+        <div class="extra-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1014.85-3.36L23 6"/></svg></div>
+        <h3>Historial de acciones</h3>
+        <p>Registro de cada transformación aplicada con opción de deshacer para recuperar versiones anteriores.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="history-section" id="historial">
+    <div class="section-header"><h2>Historial</h2><p>Registro de transformaciones aplicadas.</p></div>
+    <div class="history-list" id="historyList">
+      <div class="history-empty">Aún no has aplicado ninguna herramienta.</div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-links"><a href="#inicio">Inicio</a><a href="#editor">Editor</a><a href="#herramientas">Herramientas</a><a href="#historial">Historial</a></div>
+    <p>&copy; 2026 AarText Studio &mdash; Proyecto de <a href="../">Aaron Mejia Vega</a></p>
+  </footer>
+
+  <button class="back-top" id="backTop" aria-label="Volver arriba">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function(){
+      'use strict';
+
+      var inputText=document.getElementById('inputText');
+      var previewArea=document.getElementById('previewArea');
+      var history=[];
+      var undoStack=[];
+
+      function escapeHTML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+      function updateCounters(){
+        var text=inputText.value;
+        var words=text.trim()?text.trim().split(/\s+/).length:0;
+        var chars=text.length;
+        var spaces=(text.match(/ /g)||[]).length;
+        var lines=text?text.split('\n').length:0;
+        var sentences=(text.match(/[.!?]+\s/g)||[]).length+(text.trim().length>0&&/[.!?]$/.test(text.trim())?1:0);
+        if(!sentences&&words>0) sentences=1;
+
+        animateCounter('cntWords',words);
+        animateCounter('cntChars',chars);
+        animateCounter('cntSpaces',spaces);
+        animateCounter('cntLines',lines);
+        animateCounter('statWords',words);
+        animateCounter('statChars',chars);
+        animateCounter('statLines',lines);
+        animateCounter('statSentences',sentences);
+
+        document.getElementById('inputBadge').textContent=chars+' chars';
+      }
+
+      function animateCounter(id,val){
+        var el=document.getElementById(id);
+        var current=parseInt(el.textContent.replace(/,/g,''),10)||0;
+        if(current===val) return;
+        el.textContent=val.toLocaleString();
+        el.classList.add('bump');
+        setTimeout(function(){el.classList.remove('bump');},200);
+      }
+
+      function updatePreview(){
+        var text=inputText.value;
+        if(!text){previewArea.innerHTML='<span style="color:var(--text-muted)">La vista previa aparecerá aquí...</span>';return;}
+        var escaped=escapeHTML(text);
+        escaped=escaped.replace(/ {2,}/g,function(m){return '<span class="highlight-space">'+m.replace(/ /g,'·')+'</span>';});
+        escaped=escaped.replace(/[^\w\sáéíóúüñÁÉÍÓÚÜÑ.,;:!?¿¡'"()\-\n]/g,function(m){return '<span class="highlight-special">'+m+'</span>';});
+        previewArea.innerHTML=escaped;
+      }
+
+      inputText.addEventListener('input',function(){
+        updateCounters();
+        updatePreview();
+      });
+
+      function saveToHistory(action){
+        undoStack.push(inputText.value);
+        history.push({action:action,time:new Date()});
+        renderHistory();
+      }
+
+      function renderHistory(){
+        var list=document.getElementById('historyList');
+        if(!history.length){list.innerHTML='<div class="history-empty">Aún no has aplicado ninguna herramienta.</div>';return;}
+        list.innerHTML=history.map(function(h,i){
+          var ago=timeSince(h.time);
+          return '<div class="history-item">'+
+            '<span class="history-action">'+h.action+'</span>'+
+            '<span class="history-time">'+ago+'</span>'+
+            '<button class="history-undo" data-undo="'+i+'">Deshacer</button>'+
+          '</div>';
+        }).reverse().join('');
+      }
+
+      function timeSince(d){
+        var s=Math.floor((new Date()-d)/1000);
+        if(s<5) return 'ahora';
+        if(s<60) return 'hace '+s+'s';
+        var m=Math.floor(s/60);
+        if(m<60) return 'hace '+m+'m';
+        return 'hace '+Math.floor(m/60)+'h';
+      }
+
+      document.getElementById('historyList').addEventListener('click',function(e){
+        var btn=e.target.closest('[data-undo]');
+        if(!btn) return;
+        var idx=parseInt(btn.dataset.undo,10);
+        if(idx>=0&&idx<undoStack.length){
+          inputText.value=undoStack[idx];
+          undoStack.splice(idx+1);
+          history.splice(idx);
+          renderHistory();
+          updateCounters();
+          updatePreview();
+          showToast('Acción deshecha');
+        }
+      });
+
+      var tools={
+        doubleSpaces:function(){
+          var before=inputText.value;
+          inputText.value=before.replace(/ {2,}/g,' ');
+          if(before!==inputText.value){saveToHistory('Eliminar espacios dobles');showToast('Espacios dobles eliminados');}
+          else showToast('No se encontraron espacios dobles');
+        },
+        trimLines:function(){
+          var before=inputText.value;
+          inputText.value=before.replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').replace(/\n+$/,'');
+          if(before!==inputText.value){saveToHistory('Quitar saltos vacíos');showToast('Saltos de línea limpiados');}
+          else showToast('No hay saltos innecesarios');
+        },
+        uppercase:function(){
+          var before=inputText.value;
+          inputText.value=before.toUpperCase();
+          if(before!==inputText.value){saveToHistory('Convertir a MAYÚSCULAS');showToast('Texto en mayúsculas');}
+        },
+        lowercase:function(){
+          var before=inputText.value;
+          inputText.value=before.toLowerCase();
+          if(before!==inputText.value){saveToHistory('Convertir a minúsculas');showToast('Texto en minúsculas');}
+        },
+        titlecase:function(){
+          var before=inputText.value;
+          inputText.value=before.toLowerCase().replace(/(?:^|\s)\S/g,function(c){return c.toUpperCase();});
+          if(before!==inputText.value){saveToHistory('Convertir a Tipo Título');showToast('Texto en tipo título');}
+        },
+        sentencecase:function(){
+          var before=inputText.value;
+          inputText.value=before.toLowerCase().replace(/(^\s*\w|[.!?]\s+\w)/g,function(c){return c.toUpperCase();});
+          if(before!==inputText.value){saveToHistory('Convertir a Tipo oración');showToast('Texto en tipo oración');}
+        },
+        removeSpecial:function(){
+          var before=inputText.value;
+          inputText.value=before.replace(/[^\w\sáéíóúüñÁÉÍÓÚÜÑ.,;:!?¿¡'"()\-]/g,'');
+          if(before!==inputText.value){saveToHistory('Quitar caracteres especiales');showToast('Caracteres especiales eliminados');}
+          else showToast('No se encontraron caracteres especiales');
+        },
+        removeNumbers:function(){
+          var before=inputText.value;
+          inputText.value=before.replace(/[0-9]/g,'');
+          if(before!==inputText.value){saveToHistory('Quitar números');showToast('Números eliminados');}
+          else showToast('No se encontraron números');
+        },
+        reverseText:function(){
+          var before=inputText.value;
+          inputText.value=before.split('').reverse().join('');
+          if(before!==inputText.value){saveToHistory('Invertir texto');showToast('Texto invertido');}
+        },
+        trimAll:function(){
+          var before=inputText.value;
+          inputText.value=before.split('\n').map(function(l){return l.trim();}).join('\n').trim();
+          if(before!==inputText.value){saveToHistory('Recortar espacios');showToast('Espacios recortados');}
+          else showToast('No hay espacios para recortar');
+        },
+        copyText:function(){
+          var text=inputText.value;
+          if(!text){showToast('No hay texto para copiar');return;}
+          navigator.clipboard.writeText(text).then(function(){showToast('Texto copiado al portapapeles');});
+        },
+        clearAll:function(){
+          if(!inputText.value){showToast('El editor ya está vacío');return;}
+          saveToHistory('Limpiar todo');
+          inputText.value='';
+          showToast('Editor limpiado');
+        }
+      };
+
+      document.querySelectorAll('[data-tool]').forEach(function(btn){
+        btn.addEventListener('click',function(){
+          var t=btn.dataset.tool;
+          if(tools[t]){tools[t]();updateCounters();updatePreview();}
+        });
+      });
+
+      function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+      document.querySelectorAll('a[href^="#"]').forEach(function(a){
+        a.addEventListener('click',function(e){
+          var target=document.querySelector(a.getAttribute('href'));
+          if(target){e.preventDefault();target.scrollIntoView({behavior:'smooth'});closeMobile();}
+        });
+      });
+
+      var navbar=document.getElementById('navbar');var backTop=document.getElementById('backTop');
+      window.addEventListener('scroll',function(){navbar.classList.toggle('scrolled',window.scrollY>60);backTop.classList.toggle('show',window.scrollY>400);});
+      backTop.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});
+
+      var mobileMenu=document.getElementById('mobileMenu');var mobileOverlay=document.getElementById('mobileOverlay');
+      function openMobile(){mobileMenu.classList.add('open');mobileOverlay.classList.add('open');}
+      function closeMobile(){mobileMenu.classList.remove('open');mobileOverlay.classList.remove('open');}
+      document.getElementById('btnHamburger').addEventListener('click',openMobile);
+      document.getElementById('mobileClose').addEventListener('click',closeMobile);
+      mobileOverlay.addEventListener('click',closeMobile);
+      document.querySelectorAll('.mobile-link').forEach(function(a){a.addEventListener('click',closeMobile);});
+      document.addEventListener('keydown',function(e){if(e.key==='Escape') closeMobile();});
+
+      setInterval(function(){if(history.length) renderHistory();},30000);
+    })();
+  </script>
+</body>
+</html>
