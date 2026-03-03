@@ -3,7 +3,7 @@
 
   var CONTACT_EMAIL = 'aaronmejiavg@gmail.com';
 
-  var projects = [
+var projects = [
     {
       title: 'Café Cartago',
       desc: 'Landing page para una cafetería local en Cartago. Diseño elegante con menú de productos, secciones informativas y navegación suave.',
@@ -62,6 +62,21 @@
       accentColor: '#a78bfa',
       iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
       link: 'proyecto4/',
+      github: 'https://github.com/MercuGmes'
+    },
+    {
+      title: 'BookHaven',
+      desc: 'Librería online con catálogo interactivo, filtros por género, búsqueda, carrito de compras, wishlist, modal de detalle y ordenamiento dinámico.',
+      tags: ['HTML', 'CSS', 'JavaScript'],
+      tagColors: [
+        { bg: 'rgba(45,106,79,0.12)', color: '#40916c' },
+        { bg: 'rgba(34,211,238,0.1)', color: '#22d3ee' },
+        { bg: 'rgba(247,223,30,0.1)', color: '#f7df1e' }
+      ],
+      gradient: 'linear-gradient(135deg, #0a1a12 0%, #0f2618 50%, #0d1117 100%)',
+      accentColor: '#40916c',
+      iconPath: 'M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z',
+      link: 'proyecto5/',
       github: 'https://github.com/MercuGmes'
     }
   ];
