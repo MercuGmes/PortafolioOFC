@@ -78,6 +78,21 @@ var projects = [
       iconPath: 'M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z',
       link: 'proyecto5/',
       github: 'https://github.com/MercuGmes'
+    },
+      {
+      title: 'AarText Studio',
+      desc: 'Herramienta de texto con limpieza de espacios, conversión de mayúsculas, eliminación de caracteres especiales, vista previa en vivo y contadores animados.',
+      tags: ['HTML', 'CSS', 'JavaScript'],
+      tagColors: [
+        { bg: 'rgba(99,102,241,0.12)', color: '#818cf8' },
+        { bg: 'rgba(34,211,238,0.1)', color: '#22d3ee' },
+        { bg: 'rgba(247,223,30,0.1)', color: '#f7df1e' }
+      ],
+      gradient: 'linear-gradient(135deg, #0b0d15 0%, #131540 50%, #0d1117 100%)',
+      accentColor: '#818cf8',
+      iconPath: 'M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z',
+      link: 'proyecto6/',
+      github: 'https://github.com/MercuGmes'
     }
   ];
 
